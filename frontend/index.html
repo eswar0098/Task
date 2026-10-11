@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Maintenance Ticket Triage</title>
+    <style>
+      :root {
+        --bg: #f5f7fb;
+        --card: #ffffff;
+        --primary: #12372a;
+        --primary-soft: #dfeee5;
+        --accent: #2563eb;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --critical: #b91c1c;
+        --high: #dc2626;
+        --medium: #d97706;
+        --low: #15803d;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .page {
+        max-width: 980px;
+        margin: 32px auto;
+        padding: 0 16px;
+      }
+
+      .hero {
+        background: linear-gradient(135deg, var(--primary), #1f5a46);
+        color: white;
+        border-radius: 18px;
+        padding: 28px 32px;
+        margin-bottom: 24px;
+      }
+
+      .hero h1 {
+        margin: 0 0 10px;
+        font-size: clamp(2rem, 3vw, 2.8rem);
+      }
+
+      .hero p {
+        margin: 0;
+        opacity: 0.92;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 1.1fr 1.3fr;
+        gap: 20px;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+      }
+
+      label {
+        display: block;
+        font-weight: 700;
+        margin: 12px 0 8px;
+      }
+
+      select, textarea, button {
+        font: inherit;
+      }
+
+      select, textarea {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 14px;
+        background: #fff;
+      }
+
+      textarea {
+        min-height: 140px;
+        resize: vertical;
+      }
+
+      button {
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 16px;
+        cursor: pointer;
+        font-weight: 700;
+        margin-top: 12px;
+      }
+
+      button:hover { opacity: 0.96; }
+
+      .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 700;
+      }
+
+      .badge.critical { background: #fee2e2; color: var(--critical); }
+      .badge.high { background: #fee2e2; color: var(--high); }
+      .badge.medium { background: #fef3c7; color: var(--medium); }
+      .badge.low { background: #dcfce7; color: var(--low); }
+
+      .meta {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin: 14px 0;
+      }
+
+      .meta-box {
+        background: #f8fafc;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+      }
+
+      .meta-box strong {
+        display: block;
+        color: var(--muted);
+        font-size: 0.8rem;
+        margin-bottom: 6px;
+      }
+
+      pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        border-radius: 12px;
+        padding: 14px;
+        overflow: auto;
+        white-space: pre-wrap;
+        margin-top: 16px;
+      }
+
+      .sample {
+        margin-top: 16px;
+      }
+
+      @media (max-width: 760px) {
+        .layout { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="hero">
+        <h1>AI Maintenance Ticket Prioritization</h1>
+        <p>Classify, prioritize, and route turbine and asset tickets with simple agent-style decision logic.</p>
+      </div>
+
+      <div class="layout">
+        <div class="card">
+          <h2>Submit a ticket</h2>
+          <label for="assetType">Asset type</label>
+          <select id="assetType">
+            <option value="solar">Solar</option>
+            <option value="wind">Wind</option>
+            <option value="hydro">Hydro</option>
+            <option value="grid">Grid</option>
+          </select>
+
+          <label for="ticketText">Maintenance description</label>
+          <select id="issuePreset" style="margin-bottom:10px;">
+            <option value="">Choose a sample ticket</option>
+            <option value="Inverter 4 tripping repeatedly after noon, high temperature alarm visible.">Solar inverter thermal fault</option>
+            <option value="Gearbox vibration has increased for turbine WTG-12 with abnormal noise and metal-on-metal sound.">Wind turbine gearbox vibration</option>
+            <option value="Inspection checklist pending for spillway gate maintenance and compliance audit.">Hydro inspection backlog</option>
+            <option value="SCADA data missing for block 3 for last two hours and sensor readings are not updating.">SCADA data gap</option>
+            <option value="Blade pitch error after high wind gust event and actuator response is delayed.">Wind pitch system fault</option>
+            <option value="Curtailment instruction not reflected in generation dashboard and grid dispatch is delayed.">Grid curtailment mismatch</option>
+            <option value="Transformer cooling pump failed and smell of overheating is reported at the substation.">Transformer cooling issue</option>
+          </select>
+          <textarea id="ticketText" placeholder="Example: Inverter 4 tripping repeatedly after noon, high temperature alarm visible.">Inverter 4 tripping repeatedly after noon, high temperature alarm visible.</textarea>
+
+          <button id="runBtn">Analyze ticket</button>
+          <div class="sample">
+            <button type="button" id="demoBtn" style="background:#2563eb; margin-top:0;">Load sample issue</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div id="resultBox">
+            <p style="color: var(--muted);">No analysis yet. Enter a ticket and click Analyze.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const ticketText = document.getElementById('ticketText');
+      const assetType = document.getElementById('assetType');
+      const resultBox = document.getElementById('resultBox');
+      const issuePreset = document.getElementById('issuePreset');
+
+      issuePreset.addEventListener('change', function () {
+        if (this.value) {
+          ticketText.value = this.value;
+        }
+      });
+
+      async function analyzeTicket() {
+        const payload = {
+          text: ticketText.value.trim(),
+          asset_type: assetType.value
+        };
+
+        resultBox.innerHTML = '<p>Running classification...</p>';
+
+        try {
+          const response = await fetch('/api/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.detail || 'Request failed');
+          }
+
+          const category = data.prediction.category;
+          const severity = data.prediction.severity.toLowerCase();
+          const score = data.prediction.severity_score;
+
+          resultBox.innerHTML = `
+            <div class="result-header">
+              <h2>Ticket decision</h2>
+              <span class="badge ${severity}">${severity}</span>
+            </div>
+            <div class="meta">
+              <div class="meta-box">
+                <strong>Category</strong>
+                <span>${category}</span>
+              </div>
+              <div class="meta-box">
+                <strong>Routing team</strong>
+                <span>${data.prediction.routing_team}</span>
+              </div>
+              <div class="meta-box">
+                <strong>Severity score</strong>
+                <span>${score}/100</span>
+              </div>
+              <div class="meta-box">
+                <strong>Confidence</strong>
+                <span>${(data.prediction.confidence * 100).toFixed(1)}%</span>
+              </div>
+            </div>
+
+            <p><strong>Probable root cause:</strong> ${data.prediction.root_cause}</p>
+            <p><strong>Recommended next action:</strong> ${data.prediction.recommended_next_action}</p>
+            <p><strong>Signals:</strong> ${data.prediction.evidence.join(', ') || 'No strong signals detected.'}</p>
+
+            <div style="margin-top:18px; border:1px solid var(--border); border-radius:12px; background:#f8fafc; padding:14px;">
+              <h3 style="margin-top:0;">Model metrics</h3>
+              <p style="margin-top:0; color: var(--muted);">
+                These values show how the triage logic was built and how much data it used. They help you understand the system's transparency and confidence, not just the final decision.
+              </p>
+              <div class="meta">
+                <div class="meta-box">
+                  <strong>Dataset rows</strong>
+                  <span>${data.model_metrics.dataset_rows}</span>
+                </div>
+                <div class="meta-box">
+                  <strong>Categories</strong>
+                  <span>${data.model_metrics.categories.length}</span>
+                </div>
+                <div class="meta-box" style="grid-column: 1 / -1;">
+                  <strong>Method</strong>
+                  <span>${data.model_metrics.method}</span>
+                </div>
+              </div>
+            </div>
+
+            <pre>${JSON.stringify({ model_metrics: data.model_metrics }, null, 2)}</pre>
+          `;
+        } catch (error) {
+          resultBox.innerHTML = `<p style="color: #b91c1c;">${error.message}</p>`;
+        }
+      }
+
+      document.getElementById('runBtn').addEventListener('click', analyzeTicket);
+      document.getElementById('demoBtn').addEventListener('click', () => {
+        assetType.value = 'solar';
+        ticketText.value = 'Inverter 4 tripping repeatedly after noon, high temperature alarm visible.';
+        analyzeTicket();
+      });
+    </script>
+  </body>
+</html>

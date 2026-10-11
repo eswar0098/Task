@@ -1,0 +1,7 @@
+ticket_id,asset_type,description,target_severity,target_category
+T001,solar,"Inverter 4 tripping repeatedly after noon, high temperature alarm visible",high,inverter_thermal
+T002,wind,Gearbox vibration has increased for turbine WTG-12 with abnormal noise,critical,gearbox_vibration
+T003,hydro,Inspection checklist pending for spillway gate maintenance,medium,inspection_compliance
+T004,solar,SCADA data missing for block 3 for last two hours,medium,data_gap
+T005,wind,Blade pitch error after high wind gust event,high,pitch_system
+T006,grid,Curtailment instruction not reflected in generation dashboard,medium,grid_curtailment

@@ -1,0 +1,2 @@
+# This project uses the Python standard library only and does not require external packages.
+# It runs on the available Python 3.14 environment without native build tools.
